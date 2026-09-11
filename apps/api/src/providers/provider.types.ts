@@ -1,0 +1,2 @@
+export type ProviderResult = { provider: string; status: "ok" | "skipped" | "unavailable"; reputation: "BENIGN" | "UNKNOWN" | "SUSPICIOUS" | "MALICIOUS"; confidence: number; malwareAssociated: boolean; campaignAssociated: boolean; tags: string[]; firstSeen?: string; lastSeen?: string; references: string[]; warnings: string[] };
+export const skipped = (provider: string, warning: string): ProviderResult => ({ provider, status: "skipped", reputation: "UNKNOWN", confidence: 0, malwareAssociated: false, campaignAssociated: false, tags: [], references: [], warnings: [warning] });
