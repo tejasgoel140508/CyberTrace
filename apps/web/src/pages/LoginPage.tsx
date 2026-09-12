@@ -1,0 +1,12 @@
+import { useState } from "react";
+import { ArrowLeft, LockKeyhole, ShieldCheck } from "lucide-react";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import { BrandMark } from "../components/common/BrandMark";
+import { useAuth } from "../hooks/useAuth";
+
+export function LoginPage() {
+  const { session, login } = useAuth(); const nav = useNavigate(); const [email, setEmail] = useState("analyst@cybertrace.local"); const [password, setPassword] = useState("CyberTrace123!"); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
+  if (session) return <Navigate to="/dashboard" replace />;
+  const submit = async (event: React.FormEvent) => { event.preventDefault(); setBusy(true); setError(""); try { await login(email, password); nav("/dashboard"); } catch (reason) { setError(reason instanceof Error ? reason.message : "Invalid email or password."); } finally { setBusy(false); } };
+  return <main className="auth-shell"><Link className="back-link" to="/"><ArrowLeft size={16} /> Back to CyberTrace</Link><section className="auth-copy"><BrandMark /><p className="eyebrow">Investigation workspace</p><h1>Move from a signal to a defensible investigation.</h1><p>Sign in to review IOC intelligence, follow evidence relationships, and build an Attack DNA profile.</p><div className="auth-points"><span><ShieldCheck size={17} /> Evidence-backed intelligence</span><span><LockKeyhole size={17} /> Role-based workspace</span></div></section><form onSubmit={submit} className="auth-card"><BrandMark compact /><div className="auth-title"><p className="eyebrow">Secure access</p><h2>Welcome back</h2><p>Sign in to open your threat intelligence workspace.</p></div>{error && <p className="auth-error" role="alert">{error}</p>}<label className="label">Email<input className="input" value={email} onChange={event => setEmail(event.target.value)} type="email" autoComplete="email" required /></label><label className="label mt-4">Password<input className="input" value={password} onChange={event => setPassword(event.target.value)} type="password" autoComplete="current-password" required /></label><button className="btn mt-6 w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button><div className="demo-credentials"><span>Demo analyst</span><strong>analyst@cybertrace.local</strong><code>CyberTrace123!</code></div><p className="mt-5 text-center text-sm text-slate-400">New to CyberTrace? <Link className="text-cyan-300 hover:text-cyan-200" to="/register">Create an account</Link></p></form></main>;
+}

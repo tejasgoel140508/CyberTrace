@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum IOCType {
+  IP
+  DOMAIN
+  URL
+  HASH
+}
+
+enum Severity {
+  LOW
+  MODERATE
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Reputation {
+  BENIGN
+  UNKNOWN
+  SUSPICIOUS
+  MALICIOUS
+}
+
+enum UserRole {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(ANALYST)
+  createdAt    DateTime @default(now())
+  reports      Report[]
+  cases        InvestigationCase[]
+  investigations Investigation[]
+}
+
+model IOC {
+  id                  String                @id @default(cuid())
+  type                IOCType
+  value               String                @unique
+  severity            Severity
+  riskScore           Int
+  confidence          Int
+  reputation          Reputation
+  country             String?
+  countryCode         String?
+  latitude            Float?
+  longitude           Float?
+  asn                 String?
+  sources             String[]
+  firstSeen           DateTime?
+  lastSeen            DateTime?
+  malwareAssociated   Boolean               @default(false)
+  campaignAssociated  Boolean               @default(false)
+  isDemo              Boolean               @default(false)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  outgoingRelationships IOCRelationship[]   @relation("RelationshipSource")
+  incomingRelationships IOCRelationship[]   @relation("RelationshipTarget")
+  attackProfiles      AttackProfileIOC[]
+  locations           IOCLocation[]
+  reports             Report[]
+  cases               InvestigationCase[]
+  investigations      Investigation[]
+
+  @@index([type])
+  @@index([severity])
+  @@index([reputation])
+  @@index([isDemo])
+  @@index([riskScore])
+}
+
+model IOCRelationship {
+  id               String   @id @default(cuid())
+  sourceIocId      String
+  targetIocId      String
+  relationshipType String
+  score            Int
+  confidence       Int
+  reasons          String[]
+  createdAt        DateTime @default(now())
+  sourceIOC        IOC      @relation("RelationshipSource", fields: [sourceIocId], references: [id], onDelete: Cascade)
+  targetIOC        IOC      @relation("RelationshipTarget", fields: [targetIocId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceIocId, targetIocId, relationshipType])
+  @@index([sourceIocId])
+  @@index([targetIocId])
+}
+
+model AttackProfile {
+  id          String                   @id @default(cuid())
+  name        String                   @unique
+  attackType  String
+  severity    Severity
+  confidence  Int
+  description String
+  isDemo      Boolean                  @default(false)
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  iocs        AttackProfileIOC[]
+  techniques  AttackProfileTechnique[]
+  reports     Report[]
+}
+
+model AttackProfileIOC {
+  attackProfileId String
+  iocId           String
+  attackProfile   AttackProfile @relation(fields: [attackProfileId], references: [id], onDelete: Cascade)
+  ioc             IOC           @relation(fields: [iocId], references: [id], onDelete: Cascade)
+  @@id([attackProfileId, iocId])
+  @@index([iocId])
+}
+
+model Technique {
+  id          String                   @id @default(cuid())
+  name        String                   @unique
+  description String
+  attackProfiles AttackProfileTechnique[]
+}
+
+model AttackProfileTechnique {
+  attackProfileId String
+  techniqueId     String
+  attackProfile   AttackProfile @relation(fields: [attackProfileId], references: [id], onDelete: Cascade)
+  technique       Technique     @relation(fields: [techniqueId], references: [id], onDelete: Cascade)
+  @@id([attackProfileId, techniqueId])
+  @@index([techniqueId])
+}
+
+model Location {
+  id          String        @id @default(cuid())
+  country     String
+  countryCode String
+  latitude    Float
+  longitude   Float
+  iocs        IOCLocation[]
+  @@unique([countryCode, latitude, longitude])
+}
+
+model IOCLocation {
+  iocId      String
+  locationId String
+  ioc        IOC      @relation(fields: [iocId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  @@id([iocId, locationId])
+  @@index([locationId])
+}
+
+model Report {
+  id              String         @id @default(cuid())
+  userId          String
+  title           String
+  iocId           String?
+  attackProfileId String?
+  content         Json
+  createdAt       DateTime       @default(now())
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ioc             IOC?           @relation(fields: [iocId], references: [id], onDelete: SetNull)
+  attackProfile   AttackProfile? @relation(fields: [attackProfileId], references: [id], onDelete: SetNull)
+  @@index([userId])
+  @@index([iocId])
+  @@index([attackProfileId])
+}
+
+enum CaseStatus {
+  OPEN
+  MONITORING
+  ESCALATED
+  CLOSED
+}
+
+enum CaseVerdict {
+  PENDING_REVIEW
+  MALICIOUS
+  SUSPICIOUS
+  BENIGN
+  INSUFFICIENT_EVIDENCE
+}
+
+model InvestigationCase {
+  id        String      @id @default(cuid())
+  userId    String
+  iocId     String?
+  title     String
+  status    CaseStatus  @default(OPEN)
+  verdict   CaseVerdict @default(PENDING_REVIEW)
+  notes     String      @default("")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ioc       IOC?        @relation(fields: [iocId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([iocId])
+  @@index([status])
+}
+
+model Investigation {
+  id        String                     @id @default(cuid())
+  userId    String
+  iocId     String
+  query     String
+  createdAt DateTime                   @default(now())
+  user      User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ioc       IOC                        @relation(fields: [iocId], references: [id], onDelete: Cascade)
+  events    InvestigationTimelineEvent[]
+
+  @@index([userId, createdAt])
+  @@index([iocId])
+}
+
+model InvestigationTimelineEvent {
+  id              String        @id @default(cuid())
+  investigationId String
+  sequence        Int
+  message         String
+  occurredAt      DateTime      @default(now())
+  investigation   Investigation @relation(fields: [investigationId], references: [id], onDelete: Cascade)
+
+  @@unique([investigationId, sequence])
+  @@index([investigationId, occurredAt])
+}

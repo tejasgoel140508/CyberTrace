@@ -1,0 +1,1 @@
+export type ProviderResult={provider:string;status:"available"|"skipped"|"error";reputation:"BENIGN"|"UNKNOWN"|"SUSPICIOUS"|"MALICIOUS";confidence:number;malwareAssociated:boolean;campaignAssociated:boolean;tags:string[];firstSeen?:string;lastSeen?:string;references:string[];warnings:string[]};
