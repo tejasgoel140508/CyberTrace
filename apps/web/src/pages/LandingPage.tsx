@@ -32,7 +32,7 @@ export function LandingPage() {
       <section className="site-width trust-section" id="architecture"><div><p className="eyebrow">Built with restraint</p><h2>Technical credibility, without false certainty.</h2></div><ul><li>Explainable correlation and evidence-based scoring</li><li>PostgreSQL-backed investigation persistence</li><li>Backend-controlled intelligence handling</li><li>No fabricated intelligence for unknown indicators</li></ul><p className="trust-note">CyberTrace is a hackathon prototype for demonstrating an investigation workflow—not a production attribution system.</p></section>
       <section className="site-width final-cta"><div><p className="eyebrow">Ready to investigate</p><h2>Investigate smarter.</h2><p>Turn isolated indicators into a connected investigation.</p></div><Link className="btn" to={destination}>{action}<ArrowRight size={17}/></Link></section>
     </main>
-    <footer className="site-width landing-footer"><BrandMark compact/><span>Hackathon prototype</span></footer>
+    <footer className="site-width landing-footer"><BrandMark compact/><span>Built by Milanix · Hackathon prototype</span></footer>
   </div>;
 }
 function Concept({ tag, title, text }: { tag: string; title: string; text: string }) { return <article className="concept-card"><span>{tag}</span><h3>{title}</h3><p>{text}</p></article>; }
