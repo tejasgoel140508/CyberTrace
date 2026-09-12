@@ -70,7 +70,9 @@ const techniques = ["Phishing", "Credential Harvesting", "Malicious Redirect", "
 
 async function main() {
   const passwordHash = await bcrypt.hash("CyberTrace123!", 12);
-  const user = await prisma.user.upsert({ where: { email: "analyst@cybertrace.local" }, update: { name: "CyberTrace Analyst", passwordHash }, create: { name: "CyberTrace Analyst", email: "analyst@cybertrace.local", passwordHash } });
+  const user = await prisma.user.upsert({ where: { email: "analyst@cybertrace.local" }, update: { name: "CyberTrace Analyst", passwordHash, role: "ANALYST" }, create: { name: "CyberTrace Analyst", email: "analyst@cybertrace.local", passwordHash, role: "ANALYST" } });
+  await prisma.user.upsert({ where: { email: "admin@cybertrace.local" }, update: { name: "CyberTrace Administrator", passwordHash, role: "ADMIN" }, create: { name: "CyberTrace Administrator", email: "admin@cybertrace.local", passwordHash, role: "ADMIN" } });
+  await prisma.user.upsert({ where: { email: "viewer@cybertrace.local" }, update: { name: "CyberTrace Viewer", passwordHash, role: "VIEWER" }, create: { name: "CyberTrace Viewer", email: "viewer@cybertrace.local", passwordHash, role: "VIEWER" } });
   const byValue = new Map<string, string>();
   for (const item of iocs) {
     const { malware: _malware, campaign: _campaign, ...iocData } = item;
