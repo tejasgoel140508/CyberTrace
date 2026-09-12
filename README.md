@@ -28,6 +28,12 @@ The seed contains clearly synthetic Attack DNA scenarios: Credential Phishing Cl
 
 Optional external providers are enabled only when configured. Empty API keys leave the app fully usable with local demo data. Never commit credentials or put live credentials in client-side variables.
 
+### Live enrichment behavior
+
+Set `ENABLE_EXTERNAL_ENRICHMENT=true` to enable server-side live lookups. AlienVault OTX uses `OTX_API_KEY`; URLhaus supports URL, domain, and payload/hash lookups and can use `URLHAUS_AUTH_KEY` when configured. Public IPs are also eligible for the free `ipwho.is` infrastructure lookup. Demo seed IOCs never leave CyberTrace for live providers.
+
+Live IOC intelligence is reused for 15 minutes using the stored IOC update timestamp. Analysts can choose **Refresh Intelligence** on the Investigate page, or call `GET /api/investigate/:ioc?refresh=true`, to bypass this cache. Provider errors, timeouts, and rate limits are returned as provider status/warnings and do not fail the whole investigation. No result is treated as `UNKNOWN`, never `BENIGN`; geolocation is associated infrastructure only, not attacker location.
+
 ## Local setup
 
 CyberTrace requires a locally running PostgreSQL server; Docker and cloud databases are intentionally not used. Create a database named `cybertrace`, then copy `.env.example` to `.env` and replace `YOUR_PASSWORD` in `DATABASE_URL`.

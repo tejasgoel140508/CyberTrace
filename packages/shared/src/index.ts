@@ -14,9 +14,9 @@ export interface AttackDNA { id: string; name: string; attackType: string; sever
 export interface ThreatGraphNode { id: string; label: string; type: string; severity?: string; metadata?: Record<string, unknown>; }
 export interface ThreatGraphEdge { id: string; source: string; target: string; label: string; score?: number; }
 export interface ThreatLocation { id: string; country: string; countryCode?: string; latitude: number; longitude: number; threatCount: number; criticalCount: number; iocIds: string[]; }
-export interface EnrichmentProviderResult { provider: string; status: string; reputation?: string; confidence?: number; tags?: string[]; warnings?: string[]; }
-export interface EnrichmentResult { providers: EnrichmentProviderResult[]; summary: string; }
-export interface InvestigationResponse { query: string; generatedAt: string; ioc: IOC; enrichment: EnrichmentResult; risk: RiskResult; relationships: IOCRelationship[]; attackDNA: AttackDNA | null; graph: { nodes: ThreatGraphNode[]; edges: ThreatGraphEdge[] }; locations: ThreatLocation[]; timeline: InvestigationTimeline | null; warnings: string[]; }
+export interface EnrichmentProviderResult { provider: string; status: "SUCCESS"|"NO_DATA"|"SKIPPED"|"ERROR"|"RATE_LIMITED"; reputation?: Reputation; confidence?: number; malwareAssociated?: boolean; campaignAssociated?: boolean; tags?: string[]; evidence?: string[]; warnings?: string[]; country?: string; countryCode?: string; asn?: string | null; }
+export interface EnrichmentResult { providers: EnrichmentProviderResult[]; successfulProviders: number; queriedProviders: number; summary: string; }
+export interface InvestigationResponse { query: string; generatedAt: string; dataMode: "DEMO"|"LIVE"; ioc: IOC; enrichment: EnrichmentResult; risk: RiskResult; relationships: IOCRelationship[]; attackDNA: AttackDNA | null; graph: { nodes: ThreatGraphNode[]; edges: ThreatGraphEdge[] }; locations: ThreatLocation[]; timeline: InvestigationTimeline | null; warnings: string[]; }
 export interface InvestigationTimelineEvent { id: string; sequence: number; message: string; occurredAt: string; }
 export interface InvestigationTimeline { id: string; createdAt: string; events: InvestigationTimelineEvent[]; }
 export interface DashboardStats { totals: { iocs: number; ips: number; domains: number; urls: number; hashes: number; critical: number }; severityDistribution: { severity: Severity; count: number }[]; trend: { date: string; count: number }[]; recentCriticalIocs: IOC[]; }

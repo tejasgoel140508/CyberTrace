@@ -1,1 +1,1 @@
-import { z } from "zod"; export const iocSearchSchema=z.object({value:z.string().trim().min(1).max(2048)});
+import { z } from "zod"; export const iocSearchSchema=z.object({value:z.string().trim().min(1).max(2048),refresh:z.boolean().optional()});

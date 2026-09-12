@@ -1,1 +1,5 @@
-export type ProviderResult={provider:string;status:"available"|"skipped"|"error";reputation:"BENIGN"|"UNKNOWN"|"SUSPICIOUS"|"MALICIOUS";confidence:number;malwareAssociated:boolean;campaignAssociated:boolean;tags:string[];firstSeen?:string;lastSeen?:string;references:string[];warnings:string[]};
+export type ProviderStatus="SUCCESS"|"NO_DATA"|"SKIPPED"|"ERROR"|"RATE_LIMITED";
+export type ProviderReputation="BENIGN"|"UNKNOWN"|"SUSPICIOUS"|"MALICIOUS";
+export type ProviderResult={provider:string;status:ProviderStatus;reputation?:ProviderReputation;confidence?:number;malwareAssociated?:boolean;campaignAssociated?:boolean;tags?:string[];firstSeen?:string|null;lastSeen?:string|null;references?:unknown[];evidence?:string[];warnings?:string[];country?:string;countryCode?:string;latitude?:number;longitude?:number;asn?:string|null};
+export const skipped=(provider:string,warning:string):ProviderResult=>({provider,status:"SKIPPED",reputation:"UNKNOWN",confidence:0,tags:[],references:[],warnings:[warning]});
+export const providerError=(provider:string,error:unknown):ProviderResult=>({provider,status:"ERROR",reputation:"UNKNOWN",confidence:0,tags:[],references:[],warnings:[error instanceof Error&&error.name==="AbortError"?"Provider request timed out.":"Provider is currently unavailable."]});
